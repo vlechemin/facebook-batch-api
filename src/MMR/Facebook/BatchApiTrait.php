@@ -21,20 +21,34 @@ trait BatchApiTrait
      * @param array   $data
      * @return &array A temporary response that will be resolved later
      */
-    public function &batchApi($url, $method = 'GET', $data = [])
+    public function &batchApi($url, $method = 'GET', $data = [], $options = [])
     {
+        $method = strtoupper($method);
+
         if (count($this->batch) == self::$MAX_BATCH)
             $this->processBatch();
 
         $query = [
             'params' => [
-                'relative_url' => urlencode($url),
                 'method' => $method,
-                'body' => urlencode(http_build_query($data)),
             ],
             'result' => [],
         ];
-        
+
+        if ($method == 'GET')
+        {
+            $params = http_build_query($data);
+            $query['params']['relative_url'] = $url.(strstr($url, '?') ? '&' : '?').$params;
+        }
+        else
+        {
+            $query['params']['relative_url'] = $url;
+            $query['params']['body'] = http_build_query($data);
+        }
+
+        if (count($options))
+            $query['params'] = array_merge($query['params'], $options);
+
         $this->batch[] = &$query;
 
         return $query['result'];
