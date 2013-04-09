@@ -1,0 +1,19 @@
+{
+    "name": "vlechemin/facebook-batch-api",
+    "type": "library",
+    "description": "Use the Facebook SDK via batch requests without having to complexify the code with the pre-processing and post-processing phases.",
+    "keywords": ["facebook", "api", "batch"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vincent Lechemin"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+    },
+    "autoload": {
+        "psr-0": { "MMR": "src/" }
+    },
+    "minimum-stability": "dev"
+}
