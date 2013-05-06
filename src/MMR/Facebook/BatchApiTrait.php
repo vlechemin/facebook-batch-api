@@ -36,15 +36,14 @@ trait BatchApiTrait
         ];
 
         if ($method == 'GET')
-        {
-            $params = http_build_query($data);
-            $query['params']['relative_url'] = $url.(strstr($url, '?') ? '&' : '?').$params;
-        }
+            $query['params'] += [
+                'relative_url' => $url.(strstr($url, '?') ? '&' : '?').http_build_query($data),
+            ];
         else
-        {
-            $query['params']['relative_url'] = $url;
-            $query['params']['body'] = http_build_query($data);
-        }
+            $query['params'] += [
+                'relative_url' => $url,
+                'body' => http_build_query($data),
+            ];
 
         if (count($options))
             $query['params'] = array_merge($query['params'], $options);
@@ -86,7 +85,11 @@ trait BatchApiTrait
         $batchResponse = $this->api('/', 'POST', $params);
 
         foreach ($this->batch as $key => &$value)
-            $value['result'] = json_decode($batchResponse[$key]['body'], true);
+            $value['result'] = json_decode($batchResponse[$key]['body'], true)
+                + [
+                    'raw' => $batchResponse[$key],
+                ]
+            ;
 
         $this->batch = [];
         $this->files = [];
