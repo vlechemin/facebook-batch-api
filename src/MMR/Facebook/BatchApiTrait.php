@@ -21,7 +21,7 @@ trait BatchApiTrait
      * @param array   $data
      * @return &array A temporary response that will be resolved later
      */
-    public function &batchApi($url, $method = 'GET', $data = [], $options = [])
+    public function &batchApi($url, $method = 'GET', $data = [], $options = [], $raw = false)
     {
         $method = strtoupper($method);
 
@@ -33,6 +33,7 @@ trait BatchApiTrait
                 'method' => $method,
             ],
             'result' => [],
+            'raw' => $raw,
         ];
 
         if ($method == 'GET')
@@ -75,8 +76,8 @@ trait BatchApiTrait
 
         $queries = [];
 
-        foreach ($this->batch as $key => &$value)
-            $queries[$key] = $value['params'];
+        foreach ($this->batch as $key => &$query)
+            $queries[$key] = $query['params'];
 
         $params = array_merge([
             'batch' => $queries,
@@ -84,12 +85,8 @@ trait BatchApiTrait
 
         $batchResponse = $this->api('/', 'POST', $params);
 
-        foreach ($this->batch as $key => &$value)
-            $value['result'] = json_decode($batchResponse[$key]['body'], true)
-                + [
-                    'raw' => $batchResponse[$key],
-                ]
-            ;
+        foreach ($this->batch as $key => &$query)
+            $query['result'] = $query['raw'] ? $batchResponse[$key] : json_decode($batchResponse[$key]['body'], true);
 
         $this->batch = [];
         $this->files = [];
